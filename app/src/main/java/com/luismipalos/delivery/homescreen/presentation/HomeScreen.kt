@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.luismipalos.delivery.R
-import com.luismipalos.delivery.homescreen.data.network.dto.Restaurant
 import com.luismipalos.delivery.signin.presentation.Logo
 import com.luismipalos.delivery.ui.theme.OrangeDelivery
 import kotlinx.coroutines.launch
@@ -37,13 +36,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(viewModel: HomeScreenViewModel, navController: NavController) {
     val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
+    val restaurants = viewModel.restaurants.collectAsState().value
     val coroutineScope = rememberCoroutineScope()
 
-    coroutineScope.launch { viewModel.getRestaurants() }
-    val restaurants: List<Restaurant> by viewModel.restaurants.collectAsState()
-
-    //Log.i("Num Restaurantes HomeScreen: ", restaurants.size.toString())
-    //Log.i("Restaurante 1 HomeScreen: ", restaurants[1].coverURL)
+    if (restaurants == null)
+        coroutineScope.launch { viewModel.getRestaurants() }
 
     val restaurantes = listOf(
         "https://hips.hearstapps.com/hmg-prod/images/el-portal-alicante-restaurante-elle-gourmet-642eb08578c8a.jpg?crop=1.00xw:1.00xh;0,0&resize=980:*",

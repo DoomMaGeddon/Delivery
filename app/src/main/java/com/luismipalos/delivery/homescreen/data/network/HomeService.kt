@@ -1,16 +1,26 @@
 package com.luismipalos.delivery.homescreen.data.network
 
 import android.util.Log
-import com.luismipalos.delivery.homescreen.data.network.dto.Restaurant
+import com.luismipalos.delivery.homescreen.data.network.response.DishResponse
+import com.luismipalos.delivery.homescreen.data.network.response.RestaurantResponse
 import javax.inject.Inject
 
 class HomeService @Inject constructor(private val client: HomeClient) {
-    suspend fun getRestaurants() : List<Restaurant> {
-        val restaurantes = client.getRestaurants()
+    suspend fun getRestaurants() : List<RestaurantResponse> {
+        val restaurants = client.getRestaurants().body()!!
 
-        Log.i("Restaurantes: ", restaurantes.size.toString())
-        Log.i("Restaurantes: ", restaurantes.toString())
+        Log.i("Nº of Restaurants: ", restaurants.size.toString())
+        Log.i("Restaurants: ", restaurants.toString())
 
-        return restaurantes
+        return restaurants
+    }
+
+    suspend fun getDishes() : List<DishResponse> {
+        val dishes = client.getDishes().body()!!
+
+        Log.i("Nº of Dishes: ", dishes.size.toString())
+        Log.i("Dishes: ", dishes.toString())
+
+        return dishes
     }
 }
