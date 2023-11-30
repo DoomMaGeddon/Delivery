@@ -1,14 +1,18 @@
 package com.luismipalos.delivery.details.data.network
 
-import android.util.Log
+import com.luismipalos.delivery.details.data.network.response.DetailsResponse
 import javax.inject.Inject
 
 class DetailsService @Inject constructor(private val client: DetailsClient) {
-    suspend fun getDetails() : List<String> {
-        val details = client.getDetails()
+    suspend fun getDetails(name: String) : DetailsResponse? {
+        val details = client.getDetails().body()
 
-        Log.i("Restaurantes: ", details.toString())
-
-        return listOf(details.body()?.description ?: "")
+        if (details != null) {
+            for (item in details) {
+                if (item.name == name)
+                    return item
+            }
+        }
+        return null
     }
 }
