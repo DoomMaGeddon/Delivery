@@ -3,13 +3,14 @@ package com.luismipalos.delivery.homescreen.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.luismipalos.delivery.core.navigation.AppScreens
 import com.luismipalos.delivery.homescreen.data.network.response.RestaurantResponse
 import com.luismipalos.delivery.homescreen.domain.HomeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,13 +22,11 @@ class HomeScreenViewModel @Inject constructor(private val homeUseCase: HomeUseCa
         = MutableStateFlow(null)
     val restaurants = _restaurants
 
-    suspend fun onPlateSelected(navController: NavController, dish: String) {
-        delay(1000)
-
+    fun onPlateSelected(navController: NavController, dish: String) {
         navController.navigate(route = AppScreens.DetailScreen.route + "/" + dish)
     }
 
-    suspend fun getRestaurants() {
-        _restaurants.value = homeUseCase()
+    fun getRestaurants() {
+        viewModelScope.launch {_restaurants.value = homeUseCase()}
     }
 }

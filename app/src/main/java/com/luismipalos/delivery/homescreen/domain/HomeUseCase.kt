@@ -11,7 +11,7 @@ class HomeUseCase @Inject constructor(
         val restaurants = networkRepository.getRestaurants()
         val dishes = networkRepository.getDishes()
 
-        for (i in 1..4) {
+        for (i in 0..4) {
             restaurants[i].dish = dishes[i]
         }
 
@@ -19,7 +19,8 @@ class HomeUseCase @Inject constructor(
             restaurants[0],
             restaurants[1],
             restaurants[2],
-            restaurants[3]
+            restaurants[3],
+            restaurants[4]
         )
     }
 }
