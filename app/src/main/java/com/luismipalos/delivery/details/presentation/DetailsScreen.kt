@@ -1,6 +1,5 @@
 package com.luismipalos.delivery.details.presentation
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,26 +17,27 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import com.luismipalos.delivery.details.data.network.response.DetailsResponse
 import com.luismipalos.delivery.homescreen.presentation.Header
 import com.luismipalos.delivery.signin.presentation.Loading
 import com.luismipalos.delivery.ui.theme.DeliveryTheme
 import com.luismipalos.delivery.ui.theme.OrangeDelivery
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
-fun DetailsScreen(viewModel: DetailsScreenViewModel, navController: NavController, dish: String?) {
+fun DetailsScreen(viewModel: DetailsScreenViewModel, navController: NavController, name: String?) {
     val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
-    val coroutineScope = rememberCoroutineScope()
+    val dish = viewModel.dish.collectAsState().value
+
+    viewModel.getDetails(name!!)
 
     if (isLoading)
         Loading()
@@ -56,22 +56,14 @@ fun DetailsScreen(viewModel: DetailsScreenViewModel, navController: NavControlle
                 verticalArrangement = Arrangement.Center
             ) {
                 Header()
-                Body(viewModel, navController, coroutineScope, dish)
+                Body(viewModel, navController, dish)
             }
         }
     }
 }
 
 @Composable
-fun Body(viewModel: DetailsScreenViewModel, navController: NavController,
-         coroutineScope: CoroutineScope, dish: String?) {
-    val url: String = when (dish) {
-        "BeefBurger"
-        -> "https://www.sargento.com/assets/Uploads/Recipe/Image/burgercampNachos_07__FillWzExNzAsNTgzXQ.jpg"
-        "VegBurger"
-        -> "https://www.noracooks.com/wp-content/uploads/2023/04/veggie-burgers-6-1024x1536.jpg"
-        else -> "https://www.nowfindglutenfree.com/wp-content/uploads/sites/2/2016/02/nachos.gif"
-    }
+fun Body(viewModel: DetailsScreenViewModel, navController: NavController, dish: DetailsResponse?) {
 
     Column(
         modifier = Modifier
@@ -82,24 +74,36 @@ fun Body(viewModel: DetailsScreenViewModel, navController: NavController,
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.8f)
+                .fillMaxHeight(0.9f)
                 .padding(12.dp)
         ) {
             Column(modifier = Modifier
                 .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = rememberAsyncImagePainter(url),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(300.dp)
-                )
-                Text(text = getPlateInfo(dish))
+                horizontalAlignment = Alignment.CenterHorizontally)
+            {
+                if (dish == null)
+                    Text(text = "El plato no existe.")
+                else {
+                    AsyncImage(
+                        model = dish.coverUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(300.dp)
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Text(text = dish.description)
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Text(text = "Ingredients: ")
+                    Spacer(modifier = Modifier.height(15.dp))
+                    for (item in dish.ingredients) {
+                        Text(text = "-$item")
+                    }
+                }
             }
         }
         Spacer(modifier = Modifier.height(15.dp))
         DeliveryTheme {
-            ReturnButton {coroutineScope.launch{viewModel.onReturnSelected(navController)}}
+            ReturnButton {viewModel.onReturnSelected(navController)}
         }
     }
 }
@@ -112,45 +116,4 @@ fun ReturnButton(onReturnSelected: () -> Unit) {
     ) {
         Text(text = "Volver")
     }
-}
-
-@Composable
-fun getPlateInfo(dish: String?) : String {
-    if (dish != null) {
-        when (dish) {
-            "BeefBurger"
-                -> return """
-                        A classic beef burger with fresh vegetables and melted cheese
-                        
-                        Ingredients:
-                        -beef patty
-                        -lettuce
-                        -tomato
-                        -onion
-                        -cheese
-                        """.trimIndent()
-            "VegBurger"
-                -> return """
-                    A delicious vegetarian burger with avocado and fresh toppings.
-                    
-                    Ingredients:
-                    -vegetarian patty
-                    -lettuce
-                    -tomato
-                    -onion
-                    -avocado
-                """.trimIndent()
-            else -> return """
-                    Loaded nachos with seasoned ground beef, melted cheese, salsa, and guacamole.
-                    
-                    Ingredients:
-                    -tortilla chips
-                    -ground beef
-                    -cheese
-                    -salsa
-                    -guacamole
-                """.trimIndent()
-        }
-    }
-    return "El plato no existe/no ha sido encontrado."
 }

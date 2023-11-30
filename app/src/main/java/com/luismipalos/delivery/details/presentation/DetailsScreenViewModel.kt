@@ -3,12 +3,13 @@ package com.luismipalos.delivery.details.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.luismipalos.delivery.details.data.network.response.DetailsResponse
 import com.luismipalos.delivery.details.domain.DetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -16,15 +17,14 @@ class DetailsScreenViewModel @Inject constructor(private val detailsUseCase: Det
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _details = MutableStateFlow(emptyList<String>())
-    val details = _details.asStateFlow()
+    private val _dish: MutableStateFlow<DetailsResponse?> = MutableStateFlow(null)
+    val dish = _dish
 
-    suspend fun onReturnSelected(navController: NavController) {
-        delay(1000)
+    fun onReturnSelected(navController: NavController) {
         navController.popBackStack()
     }
 
-    suspend fun getDetails() {
-        _details.value = detailsUseCase()
+    fun getDetails(name: String) {
+        viewModelScope.launch {_dish.value = detailsUseCase(name)}
     }
 }
